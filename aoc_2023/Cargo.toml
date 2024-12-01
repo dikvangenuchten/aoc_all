@@ -1,0 +1,28 @@
+[package]
+name = "aoc_2023"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+fancy-regex = "0.12"
+regex = "1"
+lazy_static = "1"
+phf = { version = "0.11", features = ["macros"] }
+anyhow = "1"
+nom = "7.1"
+itertools = "0.12"
+tqdm = "0.6"
+
+
+[dev-dependencies]
+rstest = "0.18"
+criterion = "0.5"
+
+[profile.release]
+debug = true
+
+[[bench]]
+name = "days"
+harness = false
