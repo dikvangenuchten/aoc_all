@@ -1,0 +1,20 @@
+[package]
+name = "aoc_2024"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fancy-regex = "0.12"
+regex = "1"
+lazy_static = "1"
+
+[dev-dependencies]
+rstest = "0.18"
+criterion = "0.5"
+
+[profile.release]
+debug = true
+
+[[bench]]
+name = "days"
+harness = false
