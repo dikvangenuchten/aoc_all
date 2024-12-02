@@ -14,7 +14,3 @@ criterion = "0.5"
 
 [profile.release]
 debug = true
-
-[[bench]]
-name = "days"
-harness = false

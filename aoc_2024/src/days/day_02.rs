@@ -57,9 +57,7 @@ fn check_safe_levels(levels: &[u32]) -> bool {
     for l in levels.windows(2) {
         let prev = l[0];
         let next = l[1];
-        if prev.abs_diff(next) == 0 {
-            return false;
-        } else if prev.abs_diff(next) > 3 {
+        if prev.abs_diff(next) == 0 && prev.abs_diff(next) > 3 {
             return false;
         }
         if prev > next {
@@ -72,19 +70,17 @@ fn check_safe_levels(levels: &[u32]) -> bool {
                 // prev > next => decreasing
                 increasing = Some(false)
             }
-        } else {
-            if let Some(increasing) = increasing {
-                // increasing is false, but now we are increasing
-                if !increasing {
-                    return false;
-                }
-            } else {
-                // prev > next => decreasing
-                increasing = Some(true)
+        } else if let Some(increasing) = increasing {
+            // increasing is false, but now we are increasing
+            if !increasing {
+                return false;
             }
+        } else {
+            // prev > next => decreasing
+            increasing = Some(true)
         }
     }
-    return true;
+    true
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -99,7 +95,7 @@ impl FromStr for Report {
             .map(|x| x.parse::<u32>())
             .collect();
         if let Ok(levels) = levels {
-            return Ok(Report { levels: levels });
+            return Ok(Report { levels });
         }
         dbg!("Could not parse: {:?}", s);
         Err(ParseReportError)
