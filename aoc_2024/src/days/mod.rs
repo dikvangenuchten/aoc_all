@@ -1,11 +1,13 @@
 pub mod day_01;
+pub mod day_02;
 
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::fs;
 
 pub fn solve_days() {
-    println!("Day 01 {:?}", day_01::solve_day(read_day_input("01")))
+    println!("Day 01 {:?}", day_01::solve_day(read_day_input("01")));
+    println!("Day 02 {:?}", day_02::solve_day(read_day_input("02")));
 }
 
 pub fn read_day_input(day: &str) -> String {
