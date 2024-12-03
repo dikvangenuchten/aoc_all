@@ -57,7 +57,7 @@ fn check_safe_levels(levels: &[u32]) -> bool {
     for l in levels.windows(2) {
         let prev = l[0];
         let next = l[1];
-        if prev.abs_diff(next) == 0 && prev.abs_diff(next) > 3 {
+        if prev.abs_diff(next) == 0 || prev.abs_diff(next) > 3 {
             return false;
         }
         if prev > next {
