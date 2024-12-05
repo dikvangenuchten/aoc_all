@@ -1,5 +1,3 @@
-
-
 pub fn solve_day(input_file: String) -> (u32, u32) {
     let a = part_a(&input_file);
     let b = part_b(&input_file);
@@ -58,7 +56,7 @@ impl Rule {
         let mut seen_second = false;
         for page in order {
             if &self.first == page {
-                return !seen_second
+                return !seen_second;
             }
             if &self.second == page {
                 seen_second = true
@@ -84,17 +82,8 @@ impl PrintOrder {
     fn reorder(mut self, rules: &[Rule]) -> Self {
         for rule in rules {
             if !rule.check(&self.order) {
-                let first = self
-                    .order
-                    .iter()
-                    .position(|d| d == &rule.first)
-                    .unwrap();
-                let second = self
-                    .order
-                    .iter()
-                    .position(|d| d == &rule.second)
-                    .unwrap();
-
+                let first = self.order.iter().position(|d| d == &rule.first).unwrap();
+                let second = self.order.iter().position(|d| d == &rule.second).unwrap();
                 let el = self.order.remove(second);
                 self.order.insert(first, el);
             }
