@@ -111,6 +111,15 @@ impl Dir {
             Dir::Right => Dir::Down,
         }
     }
+
+    fn as_digit(&self) -> usize {
+        match self {
+            Dir::Up => 0,
+            Dir::Down => 1,
+            Dir::Left => 2,
+            Dir::Right => 3,
+        }
+    }
 }
 
 impl Map {
@@ -127,6 +136,12 @@ impl Map {
             }
         }
         &self.oob
+    }
+
+    fn get_size(&self) -> (usize, usize) {
+        let y = self.map.len();
+        let x = self.map[0].len();
+        (x, y)
     }
 
     fn get_visited(&self) -> HashSet<Point> {
@@ -155,7 +170,8 @@ impl Map {
     }
 
     fn check_loop(&self, extra_obs: &Point) -> bool {
-        let mut visited = HashSet::new();
+        let (x, y) = self.get_size();
+        let mut visited_: Vec<Vec<[bool; 4]>> = vec![vec![[false, false, false, false]; x]; y];
         let mut guard = self.guard;
         loop {
             match self.get_obs(guard.next_pos(), extra_obs) {
@@ -164,9 +180,12 @@ impl Map {
                 }
                 MapPart::Empty => {
                     guard.pos.add(&guard.dir);
-                    if !visited.insert((guard.pos, guard.dir)) {
+
+                    if visited_[guard.pos.y as usize][guard.pos.x as usize][guard.dir.as_digit()] {
                         return true;
-                    };
+                    }
+                    visited_[guard.pos.y as usize][guard.pos.x as usize][guard.dir.as_digit()] =
+                        true;
                 }
                 MapPart::Out => return false,
             };

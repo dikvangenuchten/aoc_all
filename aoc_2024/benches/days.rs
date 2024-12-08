@@ -62,7 +62,7 @@ criterion_group!(
     benches,
     bench_day_08,
     bench_day_07,
-    // bench_day_06,
+    bench_day_06,
     bench_day_05,
     bench_day_04,
     bench_day_03,
