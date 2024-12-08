@@ -58,10 +58,6 @@ enum Operator {
 }
 
 impl Operator {
-    fn iterator() -> impl Iterator<Item = Operator> {
-        [Operator::Sum, Operator::Mul].iter().copied()
-    }
-
     fn perform(&self, lhs: u64, rhs: u64) -> u64 {
         match self {
             Operator::Sum => lhs + rhs,
