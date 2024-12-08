@@ -254,37 +254,6 @@ vec![MapPart::Empty,MapPart::Empty,MapPart::Empty,MapPart::Empty,MapPart::Empty,
     }
 
     #[rstest]
-    #[case(Guard {pos: Point {x: 4, y: 6}, dir: Dir::Up},     Some(Point {x: 4, y: 0}),    )]
-    #[case(Guard {pos: Point {x: 2, y: 6}, dir: Dir::Up},     Some(Point {x: 2, y: 3}),    )]
-    #[case(Guard {pos: Point {x: 2, y: 2}, dir: Dir::Up},     None,    )]
-    #[case(Guard {pos: Point {x: 4, y: 6}, dir: Dir::Down},   None,    )]
-    #[case(Guard {pos: Point {x: 9, y: 0}, dir: Dir::Down},     Some(Point {x: 9, y: 1}),    )]
-    #[case(Guard {pos: Point {x: 5, y: 0}, dir: Dir::Left},   Some(Point { x: 4, y: 0 }),    )]
-    #[case(Guard {pos: Point {x: 3, y: 0}, dir: Dir::Left},     None,    )]
-    #[case(Guard {pos: Point {x: 5, y: 0}, dir: Dir::Right},   None,    )]
-    #[case(Guard {pos: Point {x: 3, y: 0}, dir: Dir::Right},     Some(Point { x: 4, y: 0 }),    )]
-    fn test_get_next_obstacle(
-        mut example_map: Map,
-        #[case] guard: Guard,
-        #[case] obstacle: Option<Point>,
-    ) {
-        // assert_eq!(example_map.get_next_obstacle(&guard), obstacle.as_ref())
-    }
-
-    #[rstest]
-    #[case(Guard {pos: Point {x: 1, y: 1}, dir: Dir::Up},     Some(Point {x: 1, y: 0}),    )]
-    #[case(Guard {pos: Point {x: 1, y: 1}, dir: Dir::Left},     Some(Point {x: 0, y: 1}),    )]
-    #[case(Guard {pos: Point {x: 1, y: 1}, dir: Dir::Down},     Some(Point {x: 1, y: 2}),    )]
-    #[case(Guard {pos: Point {x: 1, y: 1}, dir: Dir::Right},     Some(Point {x: 2, y: 1}),    )]
-    fn test_get_next_obstacle_extra_obstacles(
-        #[case] guard: Guard,
-        #[case] obstacle: Option<Point>,
-    ) {
-        let mut map: Map = Map::from_str("###\n#^#\n###").unwrap();
-        // assert_eq!(map.get_next_obstacle(&guard), obstacle.as_ref())
-    }
-
-    #[rstest]
     #[case(Point {x: 0, y: 0}, MapPart::Empty)]
     #[case(Point {x: 4, y: 0}, MapPart::Obstacle)]
     #[case(Point {x: 0, y: 4}, MapPart::Empty)]
