@@ -1,7 +1,7 @@
 use std::{collections::HashSet, str::FromStr};
 
 pub fn solve_day(input_file: &str) -> (u32, u32) {
-    let map = Map::from_str(&input_file).unwrap();
+    let map = Map::from_str(input_file).unwrap();
     let a = part_a(&map);
     let b = part_b(&map);
     (a, b)

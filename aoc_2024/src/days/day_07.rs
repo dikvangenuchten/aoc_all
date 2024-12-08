@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
 pub fn solve_day(input_file: &str) -> (u64, u64) {
-    let a = part_a(&input_file);
-    let b = part_b(&input_file);
+    let a = part_a(input_file);
+    let b = part_b(input_file);
     (a, b)
 }
 

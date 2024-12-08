@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use regex::{Captures, Regex};
 
 pub fn solve_day(input_file: &str) -> (u32, u32) {
-    let instructions = parse_instructions(&input_file);
+    let instructions = parse_instructions(input_file);
     let a = part_a(&instructions);
     let b = part_b(&instructions);
     (a, b)

@@ -1,5 +1,5 @@
 pub fn solve_day(input_file: &str) -> (u32, u32) {
-    let puzzle = parse_input(&input_file);
+    let puzzle = parse_input(input_file);
     let a = part_a(&puzzle);
     let b = part_b(&puzzle);
     (a, b)
