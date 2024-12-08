@@ -4,9 +4,13 @@ pub fn solve_day(input_file: String) -> (u32, u32) {
     (a, b)
 }
 
-pub fn part_a(input_file: &str) -> u32 {}
+fn part_a(input_file: &str) -> u32 {
+    0
+}
 
-pub fn part_b(input_file: &str) -> u32 {}
+fn part_b(input_file: &str) -> u32 {
+    0
+}
 
 #[cfg(test)]
 mod tests {

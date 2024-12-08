@@ -4,6 +4,7 @@ pub mod day_03;
 pub mod day_04;
 pub mod day_05;
 pub mod day_06;
+pub mod day_07;
 
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -15,7 +16,9 @@ pub fn solve_days() {
     println!("Day 03 {:?}", day_03::solve_day(read_day_input("03")));
     println!("Day 04 {:?}", day_04::solve_day(read_day_input("04")));
     println!("Day 05 {:?}", day_05::solve_day(read_day_input("05")));
-    println!("Day 06 {:?}", day_06::solve_day(read_day_input("06")));
+    println!("Day 06 is slow");
+    // println!("Day 06 {:?}", day_06::solve_day(read_day_input("06")));
+    println!("Day 07 {:?}", day_07::solve_day(read_day_input("07")));
 }
 
 pub fn read_day_input(day: &str) -> String {
