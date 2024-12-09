@@ -120,10 +120,10 @@ fn find_antinodes_a(antenna_1: &Point, antenna_2: &Point, map_size: (isize, isiz
     // There are a maximum of 4 antinodes
     // Let the vector between antenna_1 and antenna_2 be x
     // Then
-    // a1 - 2x  (if on map)
-    // a1 + x/3 (if integer)
-    // a2 - x/3 (if integer)
-    // a2 + 2x  (if on map)
+    // a1 + x   (if on map)
+    // a1 - x/3 (if integer)
+    // a2 + x/3 (if integer)
+    // a2 - x   (if on map)
     let vector = Point {
         x: antenna_1.x - antenna_2.x,
         y: antenna_1.y - antenna_2.y,
@@ -141,16 +141,16 @@ fn find_antinodes_a(antenna_1: &Point, antenna_2: &Point, map_size: (isize, isiz
     }
 
     let antinode_1 = Point {
-        x: antenna_1.x - 2 * vector.x,
-        y: antenna_1.y - 2 * vector.y,
+        x: antenna_1.x + vector.x,
+        y: antenna_1.y + vector.y,
     };
     if antinode_1.is_on_map(map_size.0, map_size.1) {
         antinodes.push(antinode_1);
     };
 
     let antinode_4 = Point {
-        x: antenna_2.x + 2 * vector.x,
-        y: antenna_2.y + 2 * vector.y,
+        x: antenna_2.x - vector.x,
+        y: antenna_2.y - vector.y,
     };
     if antinode_4.is_on_map(map_size.0, map_size.1) {
         antinodes.push(antinode_4);

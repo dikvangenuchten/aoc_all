@@ -1,3 +1,4 @@
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::{collections::HashSet, str::FromStr};
 
 pub fn solve_day(input_file: &str) -> (u32, u32) {
@@ -18,7 +19,7 @@ fn part_b(map: &Map) -> u32 {
     let visited = map.get_visited();
 
     visited
-        .iter()
+        .par_iter()
         .filter(|obs| obs != &&map.guard.pos)
         .filter(|obs| map.check_loop(obs))
         .count() as u32
@@ -31,7 +32,7 @@ struct Map {
     oob: MapPart,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum MapPart {
     Obstacle,
     Empty,
@@ -70,7 +71,7 @@ struct Point {
     y: i32,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 struct Guard {
     pos: Point,
     dir: Dir,
@@ -171,21 +172,23 @@ impl Map {
 
     fn check_loop(&self, extra_obs: &Point) -> bool {
         let (x, y) = self.get_size();
-        let mut visited_: Vec<Vec<[bool; 4]>> = vec![vec![[false, false, false, false]; x]; y];
+        let mut visited = vec![vec![[false, false, false, false]; x]; y];
         let mut guard = self.guard;
         loop {
             match self.get_obs(guard.next_pos(), extra_obs) {
                 MapPart::Obstacle => {
+                    match visited[guard.pos.y as usize][guard.pos.x as usize][guard.dir.as_digit()]
+                    {
+                        true => return true,
+                        false => {
+                            visited[guard.pos.y as usize][guard.pos.x as usize]
+                                [guard.dir.as_digit()] = true;
+                        }
+                    }
                     guard.dir = guard.dir.next();
                 }
                 MapPart::Empty => {
                     guard.pos.add(&guard.dir);
-
-                    if visited_[guard.pos.y as usize][guard.pos.x as usize][guard.dir.as_digit()] {
-                        return true;
-                    }
-                    visited_[guard.pos.y as usize][guard.pos.x as usize][guard.dir.as_digit()] =
-                        true;
                 }
                 MapPart::Out => return false,
             };
