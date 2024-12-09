@@ -2,7 +2,6 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::{
     collections::{BTreeSet, HashSet},
     str::FromStr,
-    usize,
 };
 
 pub fn solve_day(input_file: &str) -> (u32, u32) {
@@ -129,15 +128,6 @@ impl Dir {
             Dir::Right => Dir::Down,
         }
     }
-
-    fn as_digit(&self) -> usize {
-        match self {
-            Dir::Up => 0,
-            Dir::Down => 1,
-            Dir::Left => 2,
-            Dir::Right => 3,
-        }
-    }
 }
 
 impl Map {
@@ -176,38 +166,6 @@ impl Map {
                     visited.insert(guard.pos);
                 }
                 MapPart::Out => return visited,
-            };
-        }
-    }
-
-    fn get_obs(&self, point: Point, obs: &Point) -> &MapPart {
-        if &point == obs {
-            return &MapPart::Obstacle;
-        }
-        return self.get(point);
-    }
-
-    fn check_loop(&self, extra_obs: &Point) -> bool {
-        let (x, y) = self.get_size();
-        let mut visited = vec![vec![[false, false, false, false]; x]; y];
-        let mut guard = self.guard;
-        loop {
-            match self.get_obs(guard.next_pos(), extra_obs) {
-                MapPart::Obstacle => {
-                    match visited[guard.pos.y as usize][guard.pos.x as usize][guard.dir.as_digit()]
-                    {
-                        true => return true,
-                        false => {
-                            visited[guard.pos.y as usize][guard.pos.x as usize]
-                                [guard.dir.as_digit()] = true;
-                        }
-                    }
-                    guard.dir = guard.dir.next();
-                }
-                MapPart::Empty => {
-                    guard.pos.add(&guard.dir);
-                }
-                MapPart::Out => return false,
             };
         }
     }
@@ -290,27 +248,15 @@ impl EfficientMap {
         }
     }
 
-    fn remove_point(&mut self, point: Point) {
-        let (x, y): (usize, usize) = (point.x.try_into().unwrap(), point.y.try_into().unwrap());
-        if let Ok(idx) = self.obs_xy[x].binary_search(&point) {
-            self.obs_xy[x].remove(idx);
-        }
-        if let Ok(idx) = self.obs_yx[y].binary_search(&point) {
-            self.obs_yx[y].remove(idx);
-        }
-    }
-
     fn check_loop(&self, guard: &Guard, obstacle: &Point) -> bool {
-        // self.insert_point(*obstacle);
-
         let mut visited = BTreeSet::new();
-        let mut guard = guard.clone();
+        let mut guard = *guard;
         let mut is_loop = false;
 
         while let Some(obstacle) = self.get_next_obs_with_extra_obs(&guard, obstacle) {
             guard.pos = obstacle.sub(&guard.dir);
             guard.dir = guard.dir.next();
-            if !visited.insert(guard.clone()) {
+            if !visited.insert(guard) {
                 is_loop = true;
                 break;
             }
@@ -472,20 +418,12 @@ vec![MapPart::Empty,MapPart::Empty,MapPart::Empty,MapPart::Empty,MapPart::Empty,
     #[case(Point {x: 0, y: 0}, false)]
     #[case(Point {x: 3, y: 6}, true)]
     #[case(Point {x: 6, y: 7}, true)]
-    fn test_check_loop(example_map: Map, #[case] obstacle_point: Point, #[case] is_loop: bool) {
-        assert_eq!(example_map.check_loop(&obstacle_point), is_loop)
-    }
-
-    #[rstest]
-    #[case(Point {x: 0, y: 0}, false)]
-    #[case(Point {x: 3, y: 6}, true)]
-    #[case(Point {x: 6, y: 7}, true)]
     fn test_check_loop_efficient(
         example_map: Map,
         #[case] obstacle_point: Point,
         #[case] is_loop: bool,
     ) {
-        let mut map = EfficientMap::from_map(&example_map);
+        let map = EfficientMap::from_map(&example_map);
         assert_eq!(map.check_loop(&example_map.guard, &obstacle_point), is_loop)
     }
 
