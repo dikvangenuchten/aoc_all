@@ -129,14 +129,14 @@ impl FileSystem {
     }
 }
 
-fn update_first_empty(final_files: &Vec<File>, first_empty: usize) -> usize {
+fn update_first_empty(final_files: &[File], first_empty: usize) -> usize {
     final_files[first_empty..]
         .iter()
         .position(|f| f.is_empty && f.length > 0)
         .unwrap()
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct File {
     start_pos: usize,
     length: usize,
@@ -151,6 +151,12 @@ impl Ord for File {
             std::cmp::Ordering::Equal => self.id.cmp(&other.id),
             std::cmp::Ordering::Greater => std::cmp::Ordering::Greater,
         }
+    }
+}
+
+impl PartialOrd for File {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }
 
