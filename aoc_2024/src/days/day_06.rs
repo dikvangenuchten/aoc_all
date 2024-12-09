@@ -1,4 +1,3 @@
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::{
     collections::{BTreeSet, HashSet},
     str::FromStr,
@@ -24,7 +23,7 @@ fn part_b(map: &Map) -> u32 {
     let efficient_map = EfficientMap::from_map(map);
 
     visited
-        .par_iter()
+        .iter()
         .filter(|obs| obs != &&map.guard.pos)
         .filter(|obs| efficient_map.check_loop(&map.guard, obs))
         .count() as u32

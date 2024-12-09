@@ -1,27 +1,32 @@
 use std::str::FromStr;
 
 pub fn solve_day(input_file: &str) -> (u64, u64) {
-    let a = part_a(input_file);
-    let b = part_b(input_file);
+    let equations = &parse_input(input_file);
+    let a = part_a(equations);
+    let b = part_b(equations);
     (a, b)
 }
 
-fn part_a(input_file: &str) -> u64 {
+fn parse_input(input_file: &str) -> Vec<Equation> {
     input_file
         .trim()
         .split("\n")
         .map(|s| Equation::from_str(s).unwrap())
-        .filter(|eq| eq.is_solvable(&[Operator::Sum, Operator::Mul]))
+        .collect()
+}
+
+fn part_a(equations: &Vec<Equation>) -> u64 {
+    equations
+        .iter()
+        .filter(|eq| eq.is_solvable_backwards(&[Operator::Sum, Operator::Mul]))
         .map(|eq| eq.lhs)
         .sum()
 }
 
-fn part_b(input_file: &str) -> u64 {
-    input_file
-        .trim()
-        .split("\n")
-        .map(|s| Equation::from_str(s).unwrap())
-        .filter(|eq| eq.is_solvable(&[Operator::Sum, Operator::Mul, Operator::Concat]))
+fn part_b(equations: &Vec<Equation>) -> u64 {
+    equations
+        .iter()
+        .filter(|eq| eq.is_solvable_backwards(&[Operator::Sum, Operator::Mul, Operator::Concat]))
         .map(|eq| eq.lhs)
         .sum()
 }
@@ -65,11 +70,38 @@ impl Operator {
             Operator::Concat => lhs * 10u64.pow(rhs.ilog10() + 1) + rhs,
         }
     }
+
+    fn perform_rev(&self, lhs: u64, rhs: u64) -> u64 {
+        match self {
+            Operator::Sum => lhs - rhs,
+            Operator::Mul => lhs / rhs,
+            Operator::Concat => (lhs - rhs) / 10u64.pow(rhs.ilog10() + 1),
+        }
+    }
+
+    fn possible_rev(&self, lhs: u64, rhs: u64) -> bool {
+        match self {
+            Operator::Sum => lhs > rhs,
+            Operator::Mul => lhs % rhs == 0,
+            Operator::Concat => lhs > rhs && (lhs - rhs) % 10u64.pow(rhs.ilog10() + 1) == 0,
+        }
+    }
 }
 
 impl Equation {
+    #[allow(dead_code)]
     fn is_solvable(&self, operators: &[Operator]) -> bool {
         recursive_solve(self.lhs, self.rhs[0], &self.rhs[1..], operators)
+    }
+
+    fn is_solvable_backwards(&self, operators: &[Operator]) -> bool {
+        let len = self.rhs.len();
+        recursive_solve_back(
+            self.lhs,
+            &self.rhs[..(len - 1)],
+            self.rhs[len - 1],
+            operators,
+        )
     }
 }
 
@@ -81,6 +113,22 @@ fn recursive_solve(lhs: u64, rhs_init: u64, rhs_rem: &[u64], operators: &[Operat
         Some(rhs) => operators
             .iter()
             .any(|op| recursive_solve(lhs, op.perform(rhs_init, *rhs), &rhs_rem[1..], operators)),
+        None => lhs == rhs_init,
+    }
+}
+
+fn recursive_solve_back(lhs: u64, rhs_rem: &[u64], rhs_init: u64, operators: &[Operator]) -> bool {
+    let len = rhs_rem.len();
+    match rhs_rem.last() {
+        Some(rhs) => operators.iter().any(|op| {
+            op.possible_rev(lhs, rhs_init)
+                && recursive_solve_back(
+                    op.perform_rev(lhs, rhs_init),
+                    &rhs_rem[..len - 1],
+                    *rhs,
+                    operators,
+                )
+        }),
         None => lhs == rhs_init,
     }
 }
@@ -123,7 +171,7 @@ mod tests {
 192: 17 8 14
 21037: 9 7 18 13
 292: 11 6 16 20";
-
+        let input = &parse_input(&input);
         assert_eq!(part_a(input), 3749)
     }
 
@@ -145,6 +193,19 @@ mod tests {
     }
 
     #[rstest]
+    #[case(900, 456)]
+    #[case(4029, 49027)]
+    fn test_rev(#[case] lhs: u64, #[case] rhs: u64) {
+        for op in [Operator::Sum, Operator::Concat, Operator::Mul] {
+            // To prevent underflow in case of sum, we add rhs to lhs
+            let lhs = lhs + rhs;
+            let forward = op.perform(lhs, rhs);
+            let backward = op.perform_rev(forward, rhs);
+            assert_eq!(lhs, backward);
+        }
+    }
+
+    #[rstest]
     fn test_part_b() {
         let input = "190: 10 19
 3267: 81 40 27
@@ -155,7 +216,7 @@ mod tests {
 192: 17 8 14
 21037: 9 7 18 13
 292: 11 6 16 20";
-
+        let input = &parse_input(&input);
         assert_eq!(part_b(input), 11387)
     }
 }
