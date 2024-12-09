@@ -111,21 +111,29 @@ impl FileSystem {
                 let mut to_move = final_files.swap_remove(idx);
 
                 // Update start pos
+                assert_eq!(file, &&to_move);
                 to_move.start_pos = final_files[insert_pos].start_pos;
-                final_files.insert(insert_pos, to_move);
-                final_files[insert_pos + 1].start_pos += to_move.length;
-                final_files[insert_pos + 1].length -= file.length;
-                if final_files[insert_pos + 1].length == 0 {
-                    final_files.remove(insert_pos + 1);
-                    first_empty += final_files[first_empty..]
-                        .iter()
-                        .position(|f| f.is_empty)
-                        .unwrap()
+                if to_move.length == final_files[insert_pos].length {
+                    final_files.push(to_move);
+                    final_files.swap_remove(insert_pos);
+                } else {
+                    final_files.insert(insert_pos, to_move);
+                    final_files[insert_pos + 1].start_pos += to_move.length;
+                    final_files[insert_pos + 1].length -= to_move.length;
                 }
+
+                first_empty += update_first_empty(&final_files, first_empty)
             }
         }
         final_files
     }
+}
+
+fn update_first_empty(final_files: &Vec<File>, first_empty: usize) -> usize {
+    final_files[first_empty..]
+        .iter()
+        .position(|f| f.is_empty && f.length > 0)
+        .unwrap()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd)]
