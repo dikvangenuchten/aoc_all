@@ -15,7 +15,7 @@ fn parse_input(input_file: &str) -> Vec<Equation> {
         .collect()
 }
 
-fn part_a(equations: &Vec<Equation>) -> u64 {
+fn part_a(equations: &[Equation]) -> u64 {
     equations
         .iter()
         .filter(|eq| eq.is_solvable_backwards(&[Operator::Sum, Operator::Mul]))
@@ -23,7 +23,7 @@ fn part_a(equations: &Vec<Equation>) -> u64 {
         .sum()
 }
 
-fn part_b(equations: &Vec<Equation>) -> u64 {
+fn part_b(equations: &[Equation]) -> u64 {
     equations
         .iter()
         .filter(|eq| eq.is_solvable_backwards(&[Operator::Sum, Operator::Mul, Operator::Concat]))
@@ -171,7 +171,7 @@ mod tests {
 192: 17 8 14
 21037: 9 7 18 13
 292: 11 6 16 20";
-        let input = &parse_input(&input);
+        let input = &parse_input(input);
         assert_eq!(part_a(input), 3749)
     }
 
@@ -216,7 +216,7 @@ mod tests {
 192: 17 8 14
 21037: 9 7 18 13
 292: 11 6 16 20";
-        let input = &parse_input(&input);
+        let input = &parse_input(input);
         assert_eq!(part_b(input), 11387)
     }
 }
