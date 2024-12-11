@@ -216,10 +216,7 @@ impl FromStr for Map {
             for (x, c) in line.char_indices() {
                 if c == '^' {
                     guard_opt = Some(Guard {
-                        pos: Point {
-                            x: x as usize,
-                            y: y as usize,
-                        },
+                        pos: Point { x, y },
                         dir: Dir::Up,
                     });
                 }
@@ -252,7 +249,7 @@ impl EfficientMap {
         for (y_i, row) in map.map.iter().enumerate() {
             for (x_i, part) in row.iter().enumerate() {
                 if part == &MapPart::Obstacle {
-                    let (x, y) = (x_i as usize, y_i as usize);
+                    let (x, y) = (x_i, y_i);
                     let obstacle = Point { x, y };
                     e_map.insert_point(obstacle);
                 }
@@ -262,7 +259,7 @@ impl EfficientMap {
     }
 
     fn insert_point(&mut self, point: Point) {
-        let (x, y): (usize, usize) = (point.x.try_into().unwrap(), point.y.try_into().unwrap());
+        let (x, y): (usize, usize) = (point.x, point.y);
         if let Err(idx) = self.obs_xy[x].binary_search(&point) {
             self.obs_xy[x].insert(idx, point);
         }
@@ -289,10 +286,7 @@ impl EfficientMap {
     }
 
     fn get_next_obs(&self, guard: &Guard) -> Option<Point> {
-        let (x, y): (usize, usize) = (
-            guard.pos.x.try_into().unwrap(),
-            guard.pos.y.try_into().unwrap(),
-        );
+        let (x, y): (usize, usize) = (guard.pos.x, guard.pos.y);
         let point = match guard.dir {
             Dir::Up => {
                 let all_obs = &self.obs_xy[x];
