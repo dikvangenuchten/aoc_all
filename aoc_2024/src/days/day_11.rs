@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    str::FromStr,
-};
+use std::{collections::HashMap, str::FromStr};
 
 pub fn solve_day(input_file: &str) -> (u64, u64) {
     let mut stones = Stones::from_str(input_file).expect("Invalid input");
@@ -12,12 +9,10 @@ pub fn solve_day(input_file: &str) -> (u64, u64) {
 
 fn part_a(stones: &mut Stones) -> u64 {
     blink_counter(&stones.stones, 25) as u64
-    // stones.length_after_n_blink(25) as u64
 }
 
 fn part_b(stones: &mut Stones) -> u64 {
     blink_counter(&stones.stones, 75) as u64
-    // stones.length_after_n_blink(75) as u64
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
