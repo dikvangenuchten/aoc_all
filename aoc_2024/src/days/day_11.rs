@@ -1,4 +1,7 @@
-use std::{collections::HashMap, str::FromStr};
+use std::{
+    collections::HashMap,
+    str::FromStr,
+};
 
 pub fn solve_day(input_file: &str) -> (u64, u64) {
     let mut stones = Stones::from_str(input_file).expect("Invalid input");
@@ -8,11 +11,13 @@ pub fn solve_day(input_file: &str) -> (u64, u64) {
 }
 
 fn part_a(stones: &mut Stones) -> u64 {
-    stones.length_after_n_blink(25) as u64
+    blink_counter(&stones.stones, 25) as u64
+    // stones.length_after_n_blink(25) as u64
 }
 
 fn part_b(stones: &mut Stones) -> u64 {
-    stones.length_after_n_blink(75) as u64
+    blink_counter(&stones.stones, 75) as u64
+    // stones.length_after_n_blink(75) as u64
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -47,7 +52,7 @@ fn split_stone(n: &u64) -> (u64, u64) {
     (lhs, rhs)
 }
 
-fn blink_recursive_cached(
+fn _blink_recursive_cached(
     cache: &mut HashMap<(u64, u64), usize>,
     stone: u64,
     n_blinks: u64,
@@ -59,16 +64,43 @@ fn blink_recursive_cached(
     let result = if n_blinks == 0 {
         1
     } else if stone == 0 {
-        blink_recursive_cached(cache, 1, n_blinks - 1)
+        _blink_recursive_cached(cache, 1, n_blinks - 1)
     } else if ((stone).ilog10() + 1) % 2 == 0 {
         let (left_stone, right_stone) = split_stone(&stone);
-        blink_recursive_cached(cache, left_stone, n_blinks - 1)
-            + blink_recursive_cached(cache, right_stone, n_blinks - 1)
+        _blink_recursive_cached(cache, left_stone, n_blinks - 1)
+            + _blink_recursive_cached(cache, right_stone, n_blinks - 1)
     } else {
-        blink_recursive_cached(cache, stone * 2024, n_blinks - 1)
+        _blink_recursive_cached(cache, stone * 2024, n_blinks - 1)
     };
     cache.insert(key, result);
     result
+}
+
+fn blink_counter(stones: &[u64], n_blinks: u64) -> usize {
+    let mut counter = stones.iter().fold(HashMap::new(), |mut c, stone| {
+        *c.entry(*stone).or_insert(0) += 1;
+        c
+    });
+
+    for _ in 0..n_blinks {
+        counter = counter
+            .drain()
+            .fold(HashMap::new(), |mut c, (stone, count)| {
+                if stone == 0 {
+                    c.entry(1).and_modify(|c| *c += count).or_insert(count);
+                } else if ((stone).ilog10() + 1) % 2 == 0 {
+                    let (lhs, rhs) = split_stone(&stone);
+                    c.entry(lhs).and_modify(|c| *c += count).or_insert(count);
+                    c.entry(rhs).and_modify(|c| *c += count).or_insert(count);
+                } else {
+                    c.entry(stone * 2024)
+                        .and_modify(|c| *c += count)
+                        .or_insert(count);
+                }
+                c
+            });
+    }
+    counter.values().sum()
 }
 
 impl Stones {
@@ -98,10 +130,10 @@ impl Stones {
         self.stones.len()
     }
 
-    fn length_after_n_blink(&mut self, n: u64) -> usize {
+    fn _length_after_n_blink(&mut self, n: u64) -> usize {
         let mut sum = 0;
         for stone in &self.stones {
-            sum += blink_recursive_cached(&mut self.cache, *stone, n);
+            sum += _blink_recursive_cached(&mut self.cache, *stone, n);
         }
         sum
     }
@@ -162,8 +194,18 @@ mod tests {
             cache: HashMap::new(),
         };
         assert_eq!(
-            stones.length_after_n_blink(blinks),
+            stones._length_after_n_blink(blinks),
             stones._blink(blinks)._len()
+        )
+    }
+
+    #[rstest]
+    #[case(0, 10)]
+    fn test_blink_loop(#[case] stone: u64, #[case] blinks: u64) {
+        let mut recu_cache = HashMap::new();
+        assert_eq!(
+            blink_counter(&[stone], blinks),
+            _blink_recursive_cached(&mut recu_cache, stone, blinks)
         )
     }
 
