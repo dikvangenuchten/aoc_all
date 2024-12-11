@@ -71,8 +71,8 @@ impl MapPart {
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, PartialOrd, Ord)]
 struct Point {
-    x: i32,
-    y: i32,
+    x: usize,
+    y: usize,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash, PartialOrd, Ord)]
@@ -81,21 +81,40 @@ struct Guard {
     dir: Dir,
 }
 impl Guard {
-    fn next_pos(&self) -> Point {
-        let mut pos = self.pos;
-        pos.add(&self.dir);
-        pos
+    fn next_pos(&self) -> Option<Point> {
+        self.pos.add(&self.dir)
+    }
+}
+
+impl From<(usize, usize)> for Point {
+    fn from(value: (usize, usize)) -> Self {
+        Point {
+            x: value.0,
+            y: value.1,
+        }
     }
 }
 
 impl Point {
-    fn add(&mut self, dir: &Dir) {
+    fn add(self, dir: &Dir) -> Option<Self> {
         match dir {
-            Dir::Up => self.y -= 1,
-            Dir::Down => self.y += 1,
-            Dir::Left => self.x -= 1,
-            Dir::Right => self.x += 1,
-        };
+            Dir::Up => {
+                if self.y > 0 {
+                    Some(Point::from((self.x, self.y - 1)))
+                } else {
+                    None
+                }
+            }
+            Dir::Down => Some(Point::from((self.x, self.y + 1))),
+            Dir::Left => {
+                if self.x > 0 {
+                    Some(Point::from((self.x - 1, self.y)))
+                } else {
+                    None
+                }
+            }
+            Dir::Right => Some(Point::from((self.x + 1, self.y))),
+        }
     }
 
     fn sub(&self, dir: &Dir) -> Self {
@@ -131,18 +150,19 @@ impl Dir {
 
 impl Map {
     fn get(&self, point: Point) -> &MapPart {
-        if point.y < 0 || point.x < 0 {
-            return &self.oob;
-        }
-        let x: usize = point.x.try_into().expect("Checked before");
-        let y: usize = point.y.try_into().expect("Checked before");
-
-        if let Some(row) = self.map.get(y) {
-            if let Some(spot) = row.get(x) {
+        if let Some(row) = self.map.get(point.y) {
+            if let Some(spot) = row.get(point.x) {
                 return spot;
             }
         }
-        &self.oob
+        &MapPart::Out
+    }
+
+    fn get_some(&self, point: Option<Point>) -> &MapPart {
+        if let Some(point) = point {
+            return self.get(point);
+        }
+        &MapPart::Out
     }
 
     fn get_size(&self) -> (usize, usize) {
@@ -156,13 +176,17 @@ impl Map {
         let mut visited = HashSet::new();
         let mut guard = self.guard;
         loop {
-            match self.get(guard.next_pos()) {
+            match self.get_some(guard.next_pos()) {
                 MapPart::Obstacle => {
                     guard.dir = guard.dir.next();
                 }
                 MapPart::Empty => {
-                    guard.pos.add(&guard.dir);
-                    visited.insert(guard.pos);
+                    if let Some(next_pos) = guard.next_pos() {
+                        guard.pos = next_pos;
+                        visited.insert(guard.pos);
+                    } else {
+                        return visited;
+                    }
                 }
                 MapPart::Out => return visited,
             };
@@ -193,8 +217,8 @@ impl FromStr for Map {
                 if c == '^' {
                     guard_opt = Some(Guard {
                         pos: Point {
-                            x: x as i32,
-                            y: y as i32,
+                            x: x as usize,
+                            y: y as usize,
                         },
                         dir: Dir::Up,
                     });
@@ -228,7 +252,7 @@ impl EfficientMap {
         for (y_i, row) in map.map.iter().enumerate() {
             for (x_i, part) in row.iter().enumerate() {
                 if part == &MapPart::Obstacle {
-                    let (x, y) = (x_i as i32, y_i as i32);
+                    let (x, y) = (x_i as usize, y_i as usize);
                     let obstacle = Point { x, y };
                     e_map.insert_point(obstacle);
                 }

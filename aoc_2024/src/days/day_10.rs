@@ -51,43 +51,30 @@ impl From<(usize, usize)> for Coord {
 
 impl Coord {
     fn neighbours(&self, size: &Coord) -> [Option<Coord>; 4] {
-        // Left
         let left = {
             if self.x > 0 {
-                Some(Coord {
-                    x: self.x - 1,
-                    y: self.y,
-                })
+                Some(Coord::from((self.x - 1, self.y)))
             } else {
                 None
             }
         };
         let right = {
             if self.x < (size.x - 1) {
-                Some(Coord {
-                    x: self.x + 1,
-                    y: self.y,
-                })
+                Some(Coord::from((self.x + 1, self.y)))
             } else {
                 None
             }
         };
         let up = {
             if self.y > 0 {
-                Some(Coord {
-                    x: self.x,
-                    y: self.y - 1,
-                })
+                Some(Coord::from((self.x, self.y - 1)))
             } else {
                 None
             }
         };
         let down = {
             if self.y < (size.y - 1) {
-                Some(Coord {
-                    x: self.x,
-                    y: self.y + 1,
-                })
+                Some(Coord::from((self.x, self.y + 1)))
             } else {
                 None
             }
