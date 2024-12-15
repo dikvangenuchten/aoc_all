@@ -78,9 +78,23 @@ fn bench_day_11(c: &mut Criterion) {
         b.iter(|| day_11::solve_day(black_box(&input)))
     });
 }
+fn bench_day_12(c: &mut Criterion) {
+    let input = read_day_input("12");
+    c.bench_function("day 12", |b| {
+        b.iter(|| day_12::solve_day(black_box(&input)))
+    });
+}
+fn bench_day_13(c: &mut Criterion) {
+    let input = read_day_input("13");
+    c.bench_function("day 13", |b| {
+        b.iter(|| day_13::solve_day(black_box(&input)))
+    });
+}
 
 criterion_group!(
     benches,
+    bench_day_13,
+    bench_day_12,
     bench_day_11,
     bench_day_10,
     bench_day_09,
