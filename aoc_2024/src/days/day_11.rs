@@ -75,7 +75,7 @@ fn blink_counter(stones: &[u64], n_blinks: u64) -> usize {
     let mut counter = stones.iter().fold(HashMap::new(), |mut c, stone| {
         c.entry(*stone)
             .and_modify(|c| *c += 1)
-            .or_insert(1 as usize);
+            .or_insert(1_usize);
         c
     });
 
@@ -124,7 +124,7 @@ impl Stones {
     }
     // Used to verify cached implementation in tests
     fn _len(&self) -> usize {
-        self.stones.len() as usize
+        self.stones.len()
     }
 
     fn _length_after_n_blink(&mut self, n: u64) -> usize {

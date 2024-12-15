@@ -1,7 +1,4 @@
-use std::{
-    collections::{BTreeSet, HashSet},
-    str::FromStr,
-};
+use std::{collections::BTreeSet, str::FromStr};
 
 pub fn solve_day(input_file: &str) -> (u32, u32) {
     let map = input_file.parse().expect("Invalid input");
@@ -119,18 +116,10 @@ impl Map {
             let mut num_corners = 0;
 
             while let Some(coord) = stack.pop() {
-                for n in coord.neighbours(&size) {
-                    match n {
-                        Some(n) => {
-                            if self.get(&n) == cur_char {
-                                if unassigned.remove(&n) {
-                                    stack.push(n);
-                                    area += 1;
-                                };
-                            } else {
-                            }
-                        }
-                        None => {}
+                for n in coord.neighbours(&size).into_iter().flatten() {
+                    if self.get(&n) == cur_char && unassigned.remove(&n) {
+                        stack.push(n);
+                        area += 1;
                     }
                 }
                 num_corners += self.count_corners(&coord, cur_char, &size);
@@ -156,20 +145,20 @@ impl Map {
         // ) -> u8 {
         let check_up = coord.up().is_none_or(|c| self.get(&c) != char);
         let check_left = coord.left().is_none_or(|c| self.get(&c) != char);
-        let check_right = coord.right(&size).is_none_or(|c| self.get(&c) != char);
-        let check_down = coord.down(&size).is_none_or(|c| self.get(&c) != char);
+        let check_right = coord.right(size).is_none_or(|c| self.get(&c) != char);
+        let check_down = coord.down(size).is_none_or(|c| self.get(&c) != char);
         let check_up_left = coord
             .up()
             .is_none_or(|c| c.left().is_none_or(|c| self.get(&c) != char));
         let check_up_right = coord
             .up()
-            .is_none_or(|c| c.right(&size).is_none_or(|c| self.get(&c) != char));
+            .is_none_or(|c| c.right(size).is_none_or(|c| self.get(&c) != char));
         let check_down_left = coord
-            .down(&size)
+            .down(size)
             .is_none_or(|c| c.left().is_none_or(|c| self.get(&c) != char));
         let check_down_right = coord
-            .down(&size)
-            .is_none_or(|c| c.right(&size).is_none_or(|c| self.get(&c) != char));
+            .down(size)
+            .is_none_or(|c| c.right(size).is_none_or(|c| self.get(&c) != char));
 
         (check_up && check_left) as u32
             + (check_up && check_right) as u32
@@ -269,6 +258,7 @@ impl Coord {
 mod tests {
     use super::*;
     use rstest::rstest;
+    use std::collections::HashSet;
 
     #[rstest]
     fn test_parse() {
