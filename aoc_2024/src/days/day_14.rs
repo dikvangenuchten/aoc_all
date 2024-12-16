@@ -62,14 +62,14 @@ fn part_b(robots: &[Robot]) -> u32 {
         // Check for a straight horizontal line which is longer then 7 robots
         if matrix.iter().any(|row| {
             row.iter()
-                .fold((false, 0), |(found_pattern, cur_count), char| {
+                .try_fold((false, 0), |(found_pattern, cur_count), char| {
                     match (found_pattern, char) {
-                        (true, _) => (true, 0),
-                        (false, true) => (cur_count > 7, cur_count + 1),
-                        (false, false) => (false, 0),
+                        (true, _) => Err((true, 0)),
+                        (false, true) => Ok((cur_count > 7, cur_count + 1)),
+                        (false, false) => Ok((false, 0)),
                     }
                 })
-                .0
+                .is_err_and(|(b, _)| b)
         }) {
             return i as u32;
         }
