@@ -1,26 +1,13 @@
 use std::{
     collections::{BTreeSet, BinaryHeap, HashMap, HashSet},
     str::FromStr,
-    u32,
 };
 
 pub fn solve_day(input_file: &str) -> (u32, u32) {
     let map: Map = input_file.parse().expect("Valid input");
     let (a, b) = map.solve_map();
-    // let a = part_a(input_file);
-    // println!("Finished A");
-    // let b = part_b(input_file, a);
+
     (a, b)
-}
-
-fn part_a(input_file: &str) -> u32 {
-    let map: Map = input_file.parse().expect("Valid input");
-    map.solve_map().0
-}
-
-fn part_b(input_file: &str, max_cost: u32) -> u32 {
-    let map: Map = input_file.parse().expect("Valid input");
-    map.solve_map().1
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
@@ -129,13 +116,6 @@ impl FromStr for Map {
             end: end.into(),
         })
     }
-}
-
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
-struct StateC {
-    cost: i32,
-    pos: Coord,
-    dir: Direction,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
@@ -251,95 +231,6 @@ impl Map {
         (max_cost, visited.len() as u32)
     }
 
-    fn count_paths_with_max_cost(&self, max_cost: u32) -> u32 {
-        let start_state = (self.start, Direction::Right);
-        let mut possible_tiles = HashMap::new();
-        self.count_paths_rec(&mut possible_tiles, &start_state, max_cost);
-        let mut tiles = possible_tiles
-            .keys()
-            .map(|(pos, _)| pos)
-            .collect::<HashSet<_>>();
-
-        let mut tiles: Vec<Coord> = tiles.drain().copied().collect();
-        tiles.sort();
-        dbg!(&tiles);
-        println!("Tiles: {:?}", &tiles);
-        tiles.len() as u32
-    }
-
-    fn count_paths_rec(
-        &self,
-        possible_tiles: &mut HashMap<(Coord, Direction), u32>,
-        cur_state: &(Coord, Direction),
-        budget: u32,
-    ) -> bool {
-        if cur_state.0 == self.end {
-            assert!(budget == 0);
-            possible_tiles.insert(*cur_state, budget);
-            return true;
-        }
-        let mut reachable = false;
-        if budget >= 1 {
-            // Try forward
-            let forward_pos = cur_state.0.add(&cur_state.1);
-            let forward_state = (forward_pos, cur_state.1);
-            if let Some(future_budget) = possible_tiles.get(&forward_state) {
-                match future_budget.cmp(&(budget - 1)) {
-                    std::cmp::Ordering::Less => panic!("Found a shorter route: {:?}", forward_pos),
-                    std::cmp::Ordering::Equal => {
-                        reachable = true;
-                    }
-                    std::cmp::Ordering::Greater => println!("More expensive path"),
-                }
-            } else if self.get(&forward_state.0) == &Part::Empty && self.count_paths_rec(possible_tiles, &forward_state, budget - 1) {
-                reachable = true;
-            }
-        }
-        if budget > 1000 {
-            // Check clock wise
-            let new_dir = cur_state.1.clock();
-            // Only allow turns when that turn leads to an empty straight
-            let future_state = (cur_state.0, new_dir);
-            let future_pos = cur_state.0.add(&new_dir);
-            if let Some(future_budget) = possible_tiles.get(&future_state) {
-                match future_budget.cmp(&(budget - 1000)) {
-                    std::cmp::Ordering::Less => panic!("Found a shorter route: {:?}", future_pos),
-                    std::cmp::Ordering::Equal => {
-                        reachable = true;
-                    }
-                    std::cmp::Ordering::Greater => println!("More expensive path"),
-                }
-            } else if self.get(&future_pos) == &Part::Empty && self.count_paths_rec(possible_tiles, &future_state, budget - 1000) {
-                reachable = true;
-            }
-
-            // Check counter clock wise
-            let new_dir = cur_state.1.counter();
-            // Only allow turns when that turn leads to an empty straight
-            let future_state = (cur_state.0, new_dir);
-            let future_pos = cur_state.0.add(&new_dir);
-            if let Some(future_budget) = possible_tiles.get(&future_state) {
-                match future_budget.cmp(&(budget - 1000)) {
-                    std::cmp::Ordering::Less => panic!("Found a shorter route"),
-                    std::cmp::Ordering::Equal => {
-                        reachable = true;
-                    }
-                    std::cmp::Ordering::Greater => println!("More expensive path"),
-                }
-            } else if self.get(&future_pos) == &Part::Empty && self.count_paths_rec(possible_tiles, &(cur_state.0, new_dir), budget - 1000) {
-                reachable = true;
-            }
-        }
-        if reachable {
-            possible_tiles.insert(*cur_state, budget);
-        }
-        if cur_state.0 == (Coord { x: 3, y: 10 }) {
-            println!("Is_reachable: {:?}", reachable);
-        }
-
-        reachable
-    }
-
     fn get(&self, coord: &Coord) -> &Part {
         self.map.get(coord.y).unwrap().get(coord.x).unwrap()
     }
@@ -383,15 +274,8 @@ mod tests {
     }
 
     #[rstest]
-    #[case("###############\n#.......#....E#\n#.#.###.#.###.#\n#.....#.#...#.#\n#.###.#####.#.#\n#.#.#.......#.#\n#.#.#####.###.#\n#...........#.#\n###.#.#####.#.#\n#...#.....#.#.#\n#.#.#.###.#.#.#\n#.....#...#.#.#\n#.###.#.#.#.#.#\n#S..#.....#...#\n###############", 7036)]
-    fn test_part_a(#[case] map: &str, #[case] cost: u32) {
-        assert_eq!(part_a(map), cost)
-    }
-
-    #[rstest]
-    #[case("###############\n#.......#....E#\n#.#.###.#.###.#\n#.....#.#...#.#\n#.###.#####.#.#\n#.#.#.......#.#\n#.#.#####.###.#\n#...........#.#\n###.#.#####.#.#\n#...#.....#.#.#\n#.#.#.###.#.#.#\n#.....#...#.#.#\n#.###.#.#.#.#.#\n#S..#.....#...#\n###############", 45)]
-    fn test_part_b(#[case] map: &str, #[case] num_tiles: u32) {
-        let a = part_a(map);
-        assert_eq!(part_b(map, a), num_tiles)
+    #[case("###############\n#.......#....E#\n#.#.###.#.###.#\n#.....#.#...#.#\n#.###.#####.#.#\n#.#.#.......#.#\n#.#.#####.###.#\n#...........#.#\n###.#.#####.#.#\n#...#.....#.#.#\n#.#.#.###.#.#.#\n#.....#...#.#.#\n#.###.#.#.#.#.#\n#S..#.....#...#\n###############", 7036, 45)]
+    fn test_day(#[case] map: &str, #[case] cost: u32, #[case] num_tiles: u32) {
+        assert_eq!(solve_day(map), (cost, num_tiles))
     }
 }
