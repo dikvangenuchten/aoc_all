@@ -188,7 +188,7 @@ impl Map {
         cost: i32,
         node: State,
     ) {
-        if node.pos == self.end && *end_cost <= cost {
+        if node.pos == self.end && cost > *end_cost {
             *end_cost = cost;
             // There might be multiple directions in which the reindeer can end.
             match dijkstra_state
