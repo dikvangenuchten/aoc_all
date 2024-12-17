@@ -1,5 +1,5 @@
 use std::{
-    collections::{BTreeSet, BinaryHeap, HashMap, HashSet},
+    collections::{BTreeSet, BinaryHeap, HashMap},
     str::FromStr,
 };
 
@@ -124,106 +124,28 @@ struct State {
     dir: Direction,
 }
 
+#[derive(Debug, Default)]
+struct DijkstraState {
+    todo: BinaryHeap<(i32, State)>,
+    dist: HashMap<State, i32>,
+    prev: HashMap<State, Vec<State>>,
+}
+
 impl Map {
     fn solve_map(&self) -> (u32, u32) {
-        let start = (
-            0,
-            State {
-                pos: self.start,
-                dir: Direction::Right,
-            },
-        );
-        let mut todo = BinaryHeap::from([start]);
+        let (dijkstra_state, mut end_nodes) = self.dijkstra();
 
-        let mut dist = HashMap::<State, i32>::from([(start.1, 0)]);
-        let mut prev = HashMap::<State, BTreeSet<State>>::new();
-        let mut visited = HashMap::<(Coord, Direction), State>::new();
-        let mut end_nodes = vec![];
-        let mut end_cost = i32::MIN;
+        let max_cost = dijkstra_state
+            .dist
+            .get(end_nodes.first().unwrap())
+            .unwrap()
+            .unsigned_abs();
 
-        while let Some((cost, node)) = todo.pop() {
-            if node.pos == self.end && cost > end_cost {
-                end_cost = cost;
-                // There might be multiple directions in which the reindeer can end.
-                match dist.get(&node).expect("Must be inserted").cmp(&cost) {
-                    std::cmp::Ordering::Less => end_nodes = vec![node],
-                    std::cmp::Ordering::Equal => end_nodes.push(node),
-                    std::cmp::Ordering::Greater => (),
-                }
-            }
-            visited.insert((node.pos, node.dir), node);
-
-            let straight = node.pos.add(&node.dir);
-            if self.get(&straight) == &Part::Empty {
-                let new_state = State {
-                    pos: straight,
-                    dir: node.dir,
-                };
-                if dist
-                    .get(&new_state)
-                    .is_none_or(|prev_dist| *prev_dist < cost)
-                {
-                    todo.push((cost - 1, new_state));
-                    if dist
-                        .get(&new_state)
-                        .is_some_and(|prev_dist| *prev_dist == cost - 1)
-                    {
-                        prev.get_mut(&new_state).unwrap().insert(node);
-                    } else {
-                        dist.insert(new_state, cost - 1);
-                        prev.insert(new_state, BTreeSet::from([node]));
-                    }
-                }
-            }
-
-            let clock_state = State {
-                pos: node.pos,
-                dir: node.dir.clock(),
-            };
-            if dist
-                .get(&clock_state)
-                .is_none_or(|prev_dist| *prev_dist <= cost - 1000)
-            {
-                todo.push((cost - 1000, clock_state));
-                if dist
-                    .get(&clock_state)
-                    .is_some_and(|prev_dist| *prev_dist == cost - 1000)
-                {
-                    prev.get_mut(&clock_state).unwrap().insert(node);
-                } else {
-                    dist.insert(clock_state, cost - 1000);
-                    prev.insert(clock_state, BTreeSet::from([node]));
-                }
-            }
-
-            let counter_state = State {
-                pos: node.pos,
-                dir: node.dir.counter(),
-            };
-            if dist
-                .get(&counter_state)
-                .is_none_or(|prev_dist| *prev_dist <= cost - 1000)
-            {
-                todo.push((cost - 1000, counter_state));
-                if dist
-                    .get(&counter_state)
-                    .is_some_and(|prev_dist| *prev_dist == cost - 1000)
-                {
-                    prev.get_mut(&counter_state).unwrap().insert(node);
-                } else {
-                    dist.insert(counter_state, cost - 1000);
-                    prev.insert(counter_state, BTreeSet::from([node]));
-                }
-            }
-        }
-
-        let max_cost = dist.get(end_nodes.first().unwrap()).unwrap().unsigned_abs();
-        let mut visited = HashSet::<Coord>::from([self.start]);
-
+        let mut visited = BTreeSet::<Coord>::from([self.start]);
         while let Some(node) = end_nodes.pop() {
             visited.insert(node.pos);
-            if let Some(prevs) = prev.get(&node) {
-                assert!(prevs.len() <= 2);
+            if let Some(prevs) = dijkstra_state.prev.get(&node) {
+                assert!(prevs.len() <= 2, "{:?}", prevs);
                 end_nodes.extend(prevs);
             }
         }
@@ -231,9 +153,120 @@ impl Map {
         (max_cost, visited.len() as u32)
     }
 
+    fn dijkstra(&self) -> (DijkstraState, Vec<State>) {
+        let start = (
+            0,
+            State {
+                pos: self.start,
+                dir: Direction::Right,
+            },
+        );
+        let mut dijkstra_state = DijkstraState::default();
+        dijkstra_state.todo.push(start);
+        dijkstra_state.dist.insert(start.1, 0);
+
+        let mut end_nodes = vec![];
+        let mut end_cost = i32::MIN;
+
+        while let Some((cost, node)) = dijkstra_state.todo.pop() {
+            self.dijkstra_step(
+                &mut dijkstra_state,
+                &mut end_nodes,
+                &mut end_cost,
+                cost,
+                node,
+            );
+        }
+        (dijkstra_state, end_nodes)
+    }
+
+    fn dijkstra_step(
+        &self,
+        dijkstra_state: &mut DijkstraState,
+        end_nodes: &mut Vec<State>,
+        end_cost: &mut i32,
+        cost: i32,
+        node: State,
+    ) {
+        if node.pos == self.end && *end_cost <= cost {
+            *end_cost = cost;
+            // There might be multiple directions in which the reindeer can end.
+            match dijkstra_state
+                .dist
+                .get(&node)
+                .expect("Must be inserted")
+                .cmp(&cost)
+            {
+                std::cmp::Ordering::Less => *end_nodes = vec![node],
+                std::cmp::Ordering::Equal => end_nodes.push(node),
+                std::cmp::Ordering::Greater => (),
+            }
+        }
+
+        if self.get_straight(&node) == &Part::Empty {
+            let new_state = State {
+                pos: node.pos.add(&node.dir),
+                dir: node.dir,
+            };
+            check_insert_new(dijkstra_state, new_state, cost - 1, node);
+        }
+
+        let clock_state = State {
+            pos: node.pos,
+            dir: node.dir.clock(),
+        };
+        if self.get_straight(&clock_state) == &Part::Empty {
+            check_insert_new(dijkstra_state, clock_state, cost - 1000, node);
+        }
+
+        let counter_state = State {
+            pos: node.pos,
+            dir: node.dir.counter(),
+        };
+        if self.get_straight(&counter_state) == &Part::Empty {
+            check_insert_new(dijkstra_state, counter_state, cost - 1000, node);
+        }
+    }
+
     fn get(&self, coord: &Coord) -> &Part {
         self.map.get(coord.y).unwrap().get(coord.x).unwrap()
     }
+
+    fn get_straight(&self, state: &State) -> &Part {
+        let straight = state.pos.add(&state.dir);
+        self.get(&straight)
+    }
+}
+
+fn check_insert_new(dijkstra_state: &mut DijkstraState, next_state: State, cost: i32, node: State) {
+    // todo: &mut BinaryHeap<(i32, State)>,
+    // dist: &mut HashMap<State, i32>,
+    // prev: &mut HashMap<State, Vec<State>>,
+    dijkstra_state
+        .dist
+        .entry(next_state)
+        .and_modify(|prev_cost| {
+            if *prev_cost <= cost {
+                dijkstra_state.todo.push((cost, next_state));
+                if *prev_cost == cost {
+                    let v = dijkstra_state
+                        .prev
+                        .get_mut(&next_state)
+                        .expect("Must be present");
+                    v.push(node);
+                    // v.sort();
+                    v.dedup();
+                } else {
+                    dijkstra_state.prev.insert(next_state, vec![node]);
+                }
+                *prev_cost = cost;
+            }
+        })
+        .or_insert_with(|| {
+            dijkstra_state.todo.push((cost, next_state));
+            dijkstra_state.prev.insert(next_state, vec![node]);
+            cost
+        });
 }
 
 #[cfg(test)]

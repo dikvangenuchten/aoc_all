@@ -108,7 +108,7 @@ fn bench_day_15(c: &mut Criterion) {
 fn bench_day_16(c: &mut Criterion) {
     let input = read_day_input("16");
     c.bench_function("day 16", |b| {
-        b.iter(|| day_16::solve_day(black_box(&input)))
+        b.iter(|| assert_eq!(day_16::solve_day(black_box(&input)), (111480, 529)))
     });
 }
 
