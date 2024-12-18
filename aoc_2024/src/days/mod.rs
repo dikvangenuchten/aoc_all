@@ -14,6 +14,7 @@ pub mod day_13;
 pub mod day_14;
 pub mod day_15;
 pub mod day_16;
+pub mod day_17;
 
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -36,6 +37,7 @@ pub fn solve_days() {
     println!("Day 14 {:?}", day_14::solve_day(&read_day_input("14")));
     println!("Day 15 {:?}", day_15::solve_day(&read_day_input("15")));
     println!("Day 16 {:?}", day_16::solve_day(&read_day_input("16")));
+    println!("Day 17 {:?}", day_17::solve_day(&read_day_input("17")));
 }
 
 pub fn read_day_input(day: &str) -> String {
