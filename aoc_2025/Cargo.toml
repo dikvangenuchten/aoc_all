@@ -1,0 +1,11 @@
+[package]
+name = "aoc_2025"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+
+[dev-dependencies]
+rstest = "0.18"
+criterion = "0.5"
