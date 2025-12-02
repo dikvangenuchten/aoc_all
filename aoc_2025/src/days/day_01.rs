@@ -6,45 +6,45 @@ pub fn solve_day(input_file: &str) -> (u32, u32) {
 }
 
 pub fn part_a(instructions: &[Instruction]) -> u32 {
-    instructions.iter().fold(
-        (50, 0),
-        |mut state: (i32, u32), instruction| {
+    instructions
+        .iter()
+        .fold((50, 0), |mut state: (i32, u32), instruction| {
             state.0 += instruction.number;
             state.0 = state.0.rem_euclid(100);
             if state.0 == 0 {
                 state.1 += 1;
             }
             state
-        }
-    ).1
+        })
+        .1
 }
 
 pub fn part_b(instructions: &[Instruction]) -> u32 {
-    instructions.iter().fold(
-        (50, 0),
-        |mut state: (i32, u32), instruction| {
-            let init_state = state.clone();
-            state = step(init_state.clone(), instruction);
+    instructions
+        .iter()
+        .fold((50, 0), |mut state: (i32, u32), instruction| {
+            let init_state = state;
+            state = step(init_state, instruction);
             state
-        }
-    ).1
+        })
+        .1
 }
-
 
 fn step(mut state: (i32, u32), instruction: &Instruction) -> (i32, u32) {
     let movement = instruction.number;
 
     let direction = movement.signum();
-    
+
     let is_positive = (direction > 0) as i32;
     let is_at_zero = (state.0 == 0) as i32;
-    
-    let distance_to_zero = is_positive * (100 * is_at_zero + (100 - state.0) * (1 - is_at_zero)) +
-                          (1 - is_positive) * (100 * is_at_zero + state.0 * (1 - is_at_zero));
-    
+
+    let distance_to_zero = is_positive * (100 * is_at_zero + (100 - state.0) * (1 - is_at_zero))
+        + (1 - is_positive) * (100 * is_at_zero + state.0 * (1 - is_at_zero));
+
     let can_cross = (movement.abs() >= distance_to_zero) as i32;
-    let crossings = movement.abs().signum() * can_cross * (1 + (movement.abs() - distance_to_zero) / 100);
-    
+    let crossings =
+        movement.abs().signum() * can_cross * (1 + (movement.abs() - distance_to_zero) / 100);
+
     state.1 += crossings as u32;
     state.0 = (state.0 + instruction.number).rem_euclid(100);
     state
@@ -74,9 +74,13 @@ pub struct Instruction {
 impl Instruction {
     fn new(direction: Direction, number: u32) -> Self {
         if direction == Direction::Left {
-            Instruction { number: -(number as i32) }
+            Instruction {
+                number: -(number as i32),
+            }
         } else {
-            Instruction { number: number as i32 }
+            Instruction {
+                number: number as i32,
+            }
         }
     }
 }
@@ -119,7 +123,6 @@ mod tests {
                 Instruction::new(Direction::Left, 82),
             ]
         )
-
     }
 
     #[rstest]
@@ -130,13 +133,13 @@ mod tests {
         assert_eq!(result, 3)
     }
 
-    // #[rstest]
-    // fn test_day_01_b() {
-    //     let input_file = read_test_day_input("01");
-    //     let instructions = parse(&input_file);
-    //     let result = part_b(&instructions);
-    //     assert_eq!(result, 6)
-    // }
+    #[rstest]
+    fn test_day_01_b() {
+        let input_file = read_test_day_input("01");
+        let instructions = parse(&input_file);
+        let result = part_b(&instructions);
+        assert_eq!(result, 6)
+    }
 
     #[rstest]
     #[case((50, 0), Instruction::new(Direction::Left, 60), (90, 1))]
@@ -153,9 +156,16 @@ mod tests {
     #[case((0, 14), Instruction::new(Direction::Left, 59), (41, 14))]
     #[case((0, 13), Instruction::new(Direction::Left, 100), (0, 14))]
     #[case((0, 13), Instruction::new(Direction::Right, 100), (0, 14))]
-    fn test_step(#[case] state: (i32, u32), #[case] instruction: Instruction, #[case] expected: (i32, u32)) {
-        println!("Testing step from {:?} with instruction {:?}", state, instruction);
-        let result = step(state,&instruction);
+    fn test_step(
+        #[case] state: (i32, u32),
+        #[case] instruction: Instruction,
+        #[case] expected: (i32, u32),
+    ) {
+        println!(
+            "Testing step from {:?} with instruction {:?}",
+            state, instruction
+        );
+        let result = step(state, &instruction);
         assert_eq!(result, expected)
     }
 }
