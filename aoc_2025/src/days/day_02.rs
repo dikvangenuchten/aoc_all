@@ -28,15 +28,11 @@ impl Range {
     }
 
     fn sum_invalid(&self) -> u64 {
-        (self.start..=self.end)
-            .filter(check_invalid_part_a)
-            .sum()
+        (self.start..=self.end).filter(check_invalid_part_a).sum()
     }
 
     fn sum_invalid_b(&self) -> u64 {
-        (self.start..=self.end)
-            .filter(check_invalid_part_b)
-            .sum()
+        (self.start..=self.end).filter(check_invalid_part_b).sum()
     }
 }
 
