@@ -3,11 +3,13 @@ use std::fs;
 pub mod day_01;
 pub mod day_02;
 pub mod day_03;
+pub mod day_04;
 
 pub fn solve_days() {
     println!("Day 01 {:?}", day_01::solve_day(&read_day_input("01")));
     println!("Day 02 {:?}", day_02::solve_day(&read_day_input("02")));
     println!("Day 03 {:?}", day_03::solve_day(&read_day_input("03")));
+    println!("Day 04 {:?}", day_04::solve_day(&read_day_input("04")));
 }
 
 pub fn read_day_input(day: &str) -> String {
