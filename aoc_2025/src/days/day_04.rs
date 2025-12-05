@@ -121,7 +121,7 @@ impl FromStr for Map {
 
 #[cfg(test)]
 mod tests {
-    use crate::days::{read_test_day_input};
+    use crate::days::read_test_day_input;
 
     use super::*;
     use rstest::rstest;
@@ -182,7 +182,7 @@ mod tests {
         assert_eq!(result, 13);
     }
 
-        #[rstest]
+    #[rstest]
     fn test_day_04_b() {
         let input_file = read_test_day_input("04");
         let mut map = parse(&input_file);
