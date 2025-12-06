@@ -5,13 +5,33 @@ pub mod day_02;
 pub mod day_03;
 pub mod day_04;
 pub mod day_05;
+pub mod day_06;
 
 pub fn solve_days() {
-    println!("Day 01 {:?}", timeit(|| day_01::solve_day(&read_day_input("01"))));
-    println!("Day 02 {:?}", timeit(|| day_02::solve_day(&read_day_input("02"))));
-    println!("Day 03 {:?}", timeit(|| day_03::solve_day(&read_day_input("03"))));
-    println!("Day 04 {:?}", timeit(|| day_04::solve_day(&read_day_input("04"))));
-    println!("Day 05 {:?}", timeit(|| day_05::solve_day(&read_day_input("05"))));
+    println!(
+        "Day 01 {:?}",
+        timeit(|| day_01::solve_day(&read_day_input("01")))
+    );
+    println!(
+        "Day 02 {:?}",
+        timeit(|| day_02::solve_day(&read_day_input("02")))
+    );
+    println!(
+        "Day 03 {:?}",
+        timeit(|| day_03::solve_day(&read_day_input("03")))
+    );
+    println!(
+        "Day 04 {:?}",
+        timeit(|| day_04::solve_day(&read_day_input("04")))
+    );
+    println!(
+        "Day 05 {:?}",
+        timeit(|| day_05::solve_day(&read_day_input("05")))
+    );
+    println!(
+        "Day 06 {:?}",
+        timeit(|| day_06::solve_day(&read_day_input("06")))
+    );
 }
 
 fn timeit<F: FnOnce() -> R, R>(f: F) -> R {
