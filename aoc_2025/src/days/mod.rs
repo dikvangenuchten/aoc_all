@@ -6,40 +6,30 @@ pub mod day_03;
 pub mod day_04;
 pub mod day_05;
 pub mod day_06;
+pub mod day_07;
+pub mod day_08;
 
 pub fn solve_days() {
-    println!(
-        "Day 01 {:?}",
-        timeit(|| day_01::solve_day(&read_day_input("01")))
-    );
-    println!(
-        "Day 02 {:?}",
-        timeit(|| day_02::solve_day(&read_day_input("02")))
-    );
-    println!(
-        "Day 03 {:?}",
-        timeit(|| day_03::solve_day(&read_day_input("03")))
-    );
-    println!(
-        "Day 04 {:?}",
-        timeit(|| day_04::solve_day(&read_day_input("04")))
-    );
-    println!(
-        "Day 05 {:?}",
-        timeit(|| day_05::solve_day(&read_day_input("05")))
-    );
-    println!(
-        "Day 06 {:?}",
-        timeit(|| day_06::solve_day(&read_day_input("06")))
-    );
+    let start = std::time::Instant::now();
+    println!("Solving Advent of Code 2025:");
+    timeit_day(1, || day_01::solve_day(&read_day_input("01")));
+    timeit_day(2, || day_02::solve_day(&read_day_input("02")));
+    timeit_day(3, || day_03::solve_day(&read_day_input("03")));
+    timeit_day(4, || day_04::solve_day(&read_day_input("04")));
+    timeit_day(5, || day_05::solve_day(&read_day_input("05")));
+    timeit_day(6, || day_06::solve_day(&read_day_input("06")));
+    timeit_day(7, || day_07::solve_day(&read_day_input("07")));
+    timeit_day(8, || day_08::solve_day(&read_day_input("08")));
+    let duration = start.elapsed();
+    println!("Total time: {:.2?}", duration);
 }
 
-fn timeit<F: FnOnce() -> R, R>(f: F) -> R {
+fn timeit_day<F: FnOnce() -> R, R: std::fmt::Debug>(i: u8, f: F) {
     let start = std::time::Instant::now();
     let result = f();
     let duration = start.elapsed();
-    println!("Time elapsed: {:?}", duration);
-    result
+    let result_string = format!("Day {i}: {result:?}");
+    println!("{result_string:60}  (took: {:.2?})", duration);
 }
 
 pub fn read_day_input(day: &str) -> String {

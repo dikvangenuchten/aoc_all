@@ -22,16 +22,7 @@ pub fn part_a(ranges: &[Range], ids: &[u64]) -> u64 {
 }
 
 pub fn part_b(mut ranges: Vec<Range>) -> u64 {
-    let mut count = 0;
-    loop {
-        let init_len = ranges.len();
-        ranges = merge_ranges(ranges);
-        if ranges.len() == init_len {
-            break;
-        }
-        count += 1;
-    }
-    println!("Merged {} times", count);
+    ranges = merge_ranges(ranges);
     ranges.iter().map(|r| r.len()).sum()
 }
 
@@ -39,7 +30,7 @@ fn merge_ranges(mut ranges: Vec<Range>) -> Vec<Range> {
     ranges.sort();
     for i in 0..ranges.len() {
         let mut offset = 0;
-        for j in i+1..ranges.len() {
+        for j in i + 1..ranges.len() {
             if let Some(merged) = ranges[i].merge(&ranges[j - offset]) {
                 ranges[i] = merged;
                 ranges.remove(j - offset);
@@ -52,8 +43,18 @@ fn merge_ranges(mut ranges: Vec<Range>) -> Vec<Range> {
 
 fn parse(input_file: &str) -> (Vec<Range>, Vec<u64>) {
     if let Some((ranges, ids)) = input_file.split_once("\n\n") {
-        let ranges = ranges.trim().split('\n').map(|r| Range::from_str(r)).collect::<Result<Vec<_>, _>>().unwrap();
-        let ids = ids.trim().lines().map(|id| id.parse::<u64>()).collect::<Result<Vec<_>, _>>().unwrap();
+        let ranges = ranges
+            .trim()
+            .split('\n')
+            .map(Range::from_str)
+            .collect::<Result<Vec<_>, _>>()
+            .unwrap();
+        let ids = ids
+            .trim()
+            .lines()
+            .map(|id| id.parse::<u64>())
+            .collect::<Result<Vec<_>, _>>()
+            .unwrap();
         return (ranges, ids);
     }
     panic!("Invalid input format");
@@ -90,7 +91,9 @@ impl FromStr for Range {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (start, end) = s.split_once('-').ok_or_else(|| anyhow::anyhow!("Invalid range format"))?;
+        let (start, end) = s
+            .split_once('-')
+            .ok_or_else(|| anyhow::anyhow!("Invalid range format"))?;
         Ok(Range {
             start: start.parse()?,
             end: end.parse()?,
