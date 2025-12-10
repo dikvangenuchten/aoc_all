@@ -9,3 +9,10 @@ anyhow = "1.0.100"
 [dev-dependencies]
 rstest = "0.18"
 criterion = "0.5"
+
+[[bench]]
+name = "all_days"
+harness = false
+
+[profile.bench]
+debug = true

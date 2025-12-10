@@ -50,15 +50,15 @@ fn check_invalid_part_b(n: &u64) -> bool {
     let s = n
         .to_string()
         .chars()
-        .map(|c| c.to_digit(10).unwrap() as u8)
-        .collect::<Vec<u8>>();
-    for i in 1..(s.len() / 2 + 1) {
+        .map(|c| c as u8)
+        .collect::<Vec<_>>();
+    for i in (1..(s.len() / 2 + 1)).rev() {
         // Cannot have a repeating pattern
         if s.len() % i != 0 {
             continue;
         }
-        let pattern = &s.clone()[0..i];
-        if s.chunks(i).all(|w| *w == *pattern) {
+        let pattern = &s[0..i];
+        if s.chunks(i).all(|w| w == pattern) {
             return true;
         }
     }

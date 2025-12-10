@@ -161,10 +161,6 @@ mod tests {
         #[case] instruction: Instruction,
         #[case] expected: (i32, u32),
     ) {
-        println!(
-            "Testing step from {:?} with instruction {:?}",
-            state, instruction
-        );
         let result = step(state, &instruction);
         assert_eq!(result, expected)
     }
