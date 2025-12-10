@@ -47,11 +47,7 @@ fn check_invalid_part_a(n: &u64) -> bool {
 }
 
 fn check_invalid_part_b(n: &u64) -> bool {
-    let s = n
-        .to_string()
-        .chars()
-        .map(|c| c as u8)
-        .collect::<Vec<_>>();
+    let s = n.to_string().chars().map(|c| c as u8).collect::<Vec<_>>();
     for i in (1..(s.len() / 2 + 1)).rev() {
         // Cannot have a repeating pattern
         if s.len() % i != 0 {
