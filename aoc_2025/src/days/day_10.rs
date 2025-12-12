@@ -1,8 +1,5 @@
 use good_lp::{Expression, SolverModel, microlp, variable};
-use std::{
-    str::FromStr,
-    vec,
-};
+use std::{str::FromStr, vec};
 
 pub fn solve_day(input_file: &str) -> (u64, u64) {
     let machines = parse(input_file);

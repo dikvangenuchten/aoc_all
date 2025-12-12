@@ -1,5 +1,6 @@
 use aoc_2025::days::{
-    day_01, day_02, day_03, day_04, day_05, day_06, day_07, day_08, day_09, day_10, read_day_input,
+    day_01, day_02, day_03, day_04, day_05, day_06, day_07, day_08, day_09, day_10, day_11,
+    read_day_input,
 };
 use criterion::{Criterion, criterion_group, criterion_main};
 use std::hint::black_box;
@@ -74,6 +75,13 @@ fn benchmark_day_10(c: &mut Criterion) {
     });
 }
 
+fn benchmark_day_11(c: &mut Criterion) {
+    let input = read_day_input("11");
+    c.bench_function("day_11", |b| {
+        b.iter(|| day_11::solve_day(black_box(&input)))
+    });
+}
+
 criterion_group!(
     benches,
     benchmark_day_01,
@@ -85,6 +93,7 @@ criterion_group!(
     benchmark_day_07,
     benchmark_day_08,
     benchmark_day_09,
-    benchmark_day_10
+    benchmark_day_10,
+    benchmark_day_11
 );
 criterion_main!(benches);

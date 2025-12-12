@@ -10,6 +10,7 @@ pub mod day_07;
 pub mod day_08;
 pub mod day_09;
 pub mod day_10;
+pub mod day_11;
 
 pub fn solve_days() {
     let start = std::time::Instant::now();
@@ -24,6 +25,7 @@ pub fn solve_days() {
     timeit_day(8, || day_08::solve_day(&read_day_input("08")));
     timeit_day(9, || day_09::solve_day(&read_day_input("09")));
     timeit_day(10, || day_10::solve_day(&read_day_input("10")));
+    timeit_day(11, || day_11::solve_day(&read_day_input("11")));
     let duration = start.elapsed();
     println!("Total time: {:.2?}", duration);
 }
